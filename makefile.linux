@@ -1,4 +1,5 @@
 # linux makefile, graciously provided by strtok (https://github.com/taurreco on GitHub)
+# you need to run as 'make all', plain 'make' won't build it properly
 
 CC = gcc
 CFLAGS = -O3
