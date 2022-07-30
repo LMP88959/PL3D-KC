@@ -10,6 +10,9 @@
  */
 /*****************************************************************************/
 
+/* this define was suggested by https://www.reddit.com/user/skeeto/ */
+#define _POSIX_C_SOURCE 199309L
+
 #include "fw_priv.h"
 
 /*  xvid.c
@@ -311,6 +314,9 @@ find_shmmax(int *guess) {
             *guess = 0;
         }
     }
+#else
+    /* unused variable handling suggested by https://www.reddit.com/user/skeeto/ */
+    (void) guess;
 #endif
     return maxseg;
 }
