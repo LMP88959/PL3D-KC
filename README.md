@@ -19,9 +19,13 @@ Just like King's Crook, this code follows the same restrictions:
 If you are using macOS, go to fw.h and change FW_X11_IS_MACOS to 1.
 
 Compiling for macOS/Linux:
+
   cd PL3D-KC
+  
   cc -O3 -o pl *.c fw/*.c -lX11 -lXext
+  
   ./pl  
+  
   
 Compiling for Win32 is a bit more involved, I've only used Visual Studio
 to develop for Windows but this program doesn't use anything other than
