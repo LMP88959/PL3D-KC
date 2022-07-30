@@ -1,0 +1,40 @@
+NOTE: The macOS version is not guaranteed to work without issues.
+Though the application was originally developed on a Mac,
+I haven't tested it on other machines so I can't guarantee it'll run.
+
+Please install XQuartz from:
+https://www.xquartz.org
+
+Verify the installation by checking for the existence of this file:
+/opt/X11/lib/libXext.6.dylib
+
+Also please verify you have the AudioToolbox framework installed
+
+This is used for audio (which hasn't been implemented for the game yet)
+
+====================================================================
+
+The X11 backend tries to utilize the MIT-SHM extension for faster video updating.
+
+macOS by default has low shared memory limits which prevent us from having
+accelerated graphics for framebuffers larger than (typically) 4MB in size.
+
+In order to address this issue we must change these limits in the kernel.
+
+As per this guide:
+https://www.ssec.wisc.edu/mcidas/doc/users_guide/2015.1/SharedMemory.html
+
+As user 'root', create the file /etc/sysctl.conf
+and add lines similar to those below:
+
+kern.sysv.shmmax=67108864
+kern.sysv.shmmin=1
+kern.sysv.shmmni=128
+kern.sysv.shmseg=32
+kern.sysv.shmall=131072
+
+Make sure shmmax is divisible by 4096 otherwise some versions of macOS will
+reject the value.
+
+Reboot your Mac and then you should have the ability to access much more shared
+memory.
