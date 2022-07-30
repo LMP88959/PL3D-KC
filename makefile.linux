@@ -1,0 +1,45 @@
+# linux makefile, graciously provided by strtok (https://github.com/taurreco on GitHub)
+
+CC = gcc
+CFLAGS = -O3
+LIBS = -lX11 -lXext
+
+BIN_DIR = bin
+
+EXECS = main
+EXECS_DEPS: $(BIN_DIR)/libpl.o $(BIN_DIR)/libfw.o
+
+LIBFW = $(BIN_DIR)/libfw.o
+LIBPL = $(BIN_DIR)/libpl.o
+
+LIBFW_DEPS = $(addprefix $(BIN_DIR)/, pkb.o sys.o wvid.o xvid.o)
+LIBPL_DEPS = $(addprefix $(BIN_DIR)/, clip.o gfx.o imode.o importer.o math.o pl.o)
+
+all: $(BIN_DIR) $(EXECS)
+
+$(BIN_DIR):
+    echo "[make] making bin directory"
+    mkdir -p $@
+
+$(LIBFW_DEPS): $(BIN_DIR)/%.o: fw/%.c fw/fw.h
+    $(CC) $(CFLAGS) -c $< -o $@
+
+$(LIBPL_DEPS): $(BIN_DIR)/%.o: %.c pl.h
+    $(CC) $(CFLAGS) -c $< -o $@
+
+$(LIBFW): $(LIBFW_DEPS)
+    ld -r -o $@ $(LIBFW_DEPS)
+
+$(LIBPL): $(LIBPL_DEPS)
+    ld -r -o $@ $(LIBPL_DEPS)
+
+$(EXECS): %: %.c pl.h fw/fw.h $(LIBPL) $(LIBFW)
+    $(CC) $(CFLAGS) $< -o $@ $(LIBPL) $(LIBFW) $(LIBS)
+
+clean:
+    echo "[make] deleting bin directory"
+    rm -r $(BIN_DIR)
+    echo "[make] deleting executables"
+    for exec in $(EXECS) ; do \
+    rm $$exec ; \
+    done
