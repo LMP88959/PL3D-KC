@@ -8,10 +8,6 @@ https://www.xquartz.org
 Verify the installation by checking for the existence of this file:
 /opt/X11/lib/libXext.6.dylib
 
-Also please verify you have the AudioToolbox framework installed
-
-This is used for audio (which hasn't been implemented for the game yet)
-
 ====================================================================
 
 The X11 backend tries to utilize the MIT-SHM extension for faster video updating.
