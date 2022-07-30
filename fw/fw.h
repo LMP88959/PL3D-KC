@@ -42,7 +42,11 @@
 
 /* define as 1 if running X11 under macOS with XQuartz */
 #ifndef FW_X11_IS_MACOS
+#ifdef __APPLE__
+#define FW_X11_IS_MACOS     1
+#else
 #define FW_X11_IS_MACOS     0
+#endif
 #endif
 
 #endif
