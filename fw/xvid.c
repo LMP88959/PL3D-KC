@@ -25,9 +25,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
-
+#if FW_X11_IS_MACOS
 #include <sys/sysctl.h>
-
+#endif
 #include <sys/time.h>
 #include <time.h>
 
