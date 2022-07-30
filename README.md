@@ -20,7 +20,7 @@ If you are using macOS, go to fw.h and change FW_X11_IS_MACOS to 1.
 
 Compiling for macOS/Linux:
   cd PL3D-KC
-  gcc -lX11 -lXext -O3 *.c fw/*.c -o pl
+  cc -O3 -o pl *.c fw/*.c -lX11 -lXext
   ./pl  
   
 Compiling for Win32 is a bit more involved, I've only used Visual Studio
