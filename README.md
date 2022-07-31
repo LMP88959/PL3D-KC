@@ -16,8 +16,6 @@ Just like King's Crook, this code follows the same restrictions:
 5. No compiler specific features and no SIMD.
 6. Single threaded.
 
-If you are using macOS, go to fw.h and change FW_X11_IS_MACOS to 1.
-
 Compiling for macOS/Linux:
 
   cd PL3D-KC
