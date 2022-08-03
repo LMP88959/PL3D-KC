@@ -16,6 +16,22 @@ Just like King's Crook, this code follows the same restrictions:
 5. No compiler specific features and no SIMD.
 6. Single threaded.
 
+================================================================
+Feature List:
+
+- N-gon rendering (not limited to triangles)
+- Depth (Z) buffering
+- Flat polygon filling
+- Affine texture mapped polygon filling
+- Near plane clipping
+- Viewport clipping
+- Back face culling
+- Immediate mode interface
+- Matrix stack for transformations
+- Code to generate a box
+- King's Crook DMDL format importer
+================================================================
+
 Compiling for macOS/Linux:
 
   cd PL3D-KC
