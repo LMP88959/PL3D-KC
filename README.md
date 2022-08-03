@@ -53,4 +53,5 @@ If you have any questions feel free to leave a comment on YouTube OR
 join the King's Crook Discord server :)
 
 YouTube: https://www.youtube.com/c/LMP88
+
 Discord: https://discord.gg/hdYctSmyQJ
