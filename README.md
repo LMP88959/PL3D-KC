@@ -34,13 +34,13 @@ Feature List:
 ================================================================
 
 Compiling for macOS/Linux:
-
+```
   cd PL3D-KC
   
   cc -O3 -o pl *.c fw/*.c -lX11 -lXext
   
   ./pl  
-  
+```
   
 Compiling for Win32 is a bit more involved, I've only used Visual Studio
 to develop for Windows but this program doesn't use anything other than
