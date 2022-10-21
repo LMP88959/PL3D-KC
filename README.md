@@ -55,3 +55,5 @@ join the King's Crook Discord server :)
 YouTube: https://www.youtube.com/c/LMP88
 
 Discord: https://discord.gg/hdYctSmyQJ
+
+itch.io: https://kingscrook.itch.io/kings-crook
