@@ -1,25 +1,27 @@
 /*****************************************************************************/
 /*
  * FW LE (Lite edition) - Fundamentals of the King's Crook graphics engine.
- * 
+ *
  *   by EMMIR 2018-2022
- *   
+ *
  *   YouTube: https://www.youtube.com/c/LMP88
- *   
+ *
  * This software is released into the public domain.
  */
 /*****************************************************************************/
 
 /* this define was suggested by https://www.reddit.com/user/skeeto/ */
+#ifdef __linux__
 #define _POSIX_C_SOURCE 199309L
+#endif
 
 #include "fw_priv.h"
 
 /*  xvid.c
- * 
+ *
  * All the X11 specific code for input/graphics/timing.
  * Also deals with things needed for macOS.
- * 
+ *
  */
 #ifdef FW_OS_TYPE_X11
 
@@ -47,14 +49,14 @@
 static struct {
     Display *display;
     int      screen;
-    
+
     Window root_wnd;
     Window window;
-    
+
     GC      gc;
     Visual *visual;
     XImage *ximage;
-    
+
     int width;
     int height;
     int depth;
@@ -65,18 +67,18 @@ static struct {
 } FWi_x = {
         NULL, /* display */
         0,    /* screen */
-        
+
         None, /* root_wnd */
         None, /* window */
-        
+
         None, /* gc */
         NULL, /* visual */
         NULL, /* ximage */
-        
+
         320,  /* width */
         200,  /* height */
         32,   /* depth */
-                        
+
 #if FW_X11_HAS_SHM_EXT
         { 0, 0, 0, 0 }, /* shminfo */
 #endif
@@ -134,7 +136,7 @@ xerror_uninstall(void)
 
 static int
 readevent(XEvent *e)
-{    
+{
     switch (e->type) {
         case KeyPress:
         case KeyRelease:
@@ -171,23 +173,23 @@ open_xdisplay(void)
     if (FWi_x.display == NULL) {
         return 0;
     }
-    
+
     d = FWi_x.display;
-    
+
     FWi_x.screen   = XDefaultScreen    (d);
     FWi_x.root_wnd = XDefaultRootWindow(d);
-    
+
     setattr.event_mask       = FW_XEVENT_MASK;
     setattr.border_pixel     = BlackPixel(d, FWi_x.screen);
     setattr.background_pixel = setattr.border_pixel;
-    
+
     winmask      = CWEventMask;
     FWi_x.window = XCreateWindow(
             d, FWi_x.root_wnd, 0, 0,
             320, 200, 0, CopyFromParent,
             InputOutput, CopyFromParent,
             winmask, &setattr);
-    
+
     XGetWindowAttributes(d, FWi_x.window, &getattr);
     FWi_x.visual = getattr.visual;
     FWi_x.depth  = getattr.depth;
@@ -201,14 +203,14 @@ open_xdisplay(void)
     if ((rm == 0xff && bm == 0xff0000)) {
         FW_info("[xvid] detected bgr! only rgb supported, continuing anyways");
     }
-    
+
     WM_DELETE_WINDOW = XInternAtom(d, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(d, FWi_x.window, &WM_DELETE_WINDOW, 1);
-    
+
     hint.res_name  = "jvfwLE";
     hint.res_class = "JvFWLE";
     XSetClassHint(d, FWi_x.window, &hint);
-    
+
     wm_hints.flags         = InputHint | StateHint | WindowGroupHint;
     wm_hints.input         = True;
     wm_hints.initial_state = NormalState;
@@ -223,7 +225,7 @@ test_xlocal(void)
 {
     int loc;
     char *name;
-    
+
     loc = 0;
     name = XDisplayName(NULL);
     loc |= (name == NULL);
@@ -244,7 +246,7 @@ test_xshm(Display *display)
     Bool b;
 #endif
     int n;
-    
+
     if (XQueryExtension(display, "MIT-SHM", &n, &n, &n) == False) {
         return 0;
     }
@@ -265,7 +267,7 @@ FWi_stol(register char *is, int *err)
     char *tailptr;
     long  val;
     int   i;
-    
+
     if (is == NULL) {
         return 0;
     }
@@ -299,7 +301,7 @@ find_shmmax(int *guess) {
     char *sub;
     long  size;
     int   err = 0;
-    
+
     *guess = 1;
     f = popen("sysctl kern.sysv.shmmax", "r");
     while (fgets(buf, sizeof(buf), f) != NULL) {
@@ -332,14 +334,14 @@ create_xvidbuffer(int w, int h, int shm)
     int  shmsz;
     int  guess, success;
     GC   gc;
-    
+
     guess = 0;
     success = 0;
-    
+
     d    = FWi_x.display;
     vis  = FWi_x.visual;
     dpth = FWi_x.depth;
-    
+
     if (d == NULL) {
         return 0;
     }
@@ -348,7 +350,7 @@ create_xvidbuffer(int w, int h, int shm)
 #else
     FWi_x.use_shm = test_xshm(d);
 #endif
-    
+
 #if FW_X11_HAS_SHM_EXT
     if (FWi_x.use_shm) {
         shmmx = find_shmmax(&guess);
@@ -370,14 +372,14 @@ create_xvidbuffer(int w, int h, int shm)
             FW_info("[xvid] error shmget of size %d failed", shmsz);
             goto shm_err_failshmget;
         }
-        
+
         img->data = shmat(FWi_x.shminfo.shmid, NULL, 0);
         FWi_x.shminfo.shmaddr = img->data;
         if (FWi_x.shminfo.shmaddr == (char*) -1) {
             FW_info("[xvid] error shmat failed");
             goto shm_err_failshmat;
         }
-        
+
         FWi_x.shminfo.readOnly = False;
         xerror_install();
         success = XShmAttach(d, &FWi_x.shminfo);
@@ -385,7 +387,7 @@ create_xvidbuffer(int w, int h, int shm)
             FW_info("[xvid] error attaching shared memory info to XDisplay");
             goto shm_err_failattach;
         }
-        
+
         xerror_install();
         /* test SHM put */
         gc = XCreateGC(d, FWi_x.window, 0, NULL);
@@ -396,10 +398,10 @@ create_xvidbuffer(int w, int h, int shm)
             FW_info("[xvid] error testing SHM put onto XDisplay");
             goto shm_err_failattach; /* same goto as attach failure */
         }
-        
+
         XSync(d, False);
         goto shm_success;
-        
+
         shm_err_failattach: shmdt (FWi_x.shminfo.shmaddr);
         shm_err_failshmat:  shmctl(FWi_x.shminfo.shmid, IPC_RMID, 0);
         shm_err_failshmget: XDestroyImage(img); img = NULL;
@@ -409,7 +411,7 @@ create_xvidbuffer(int w, int h, int shm)
         FW_info("[xvid] using X-Windows SHM extension: %d", FWi_x.use_shm);
     }
 #endif
-    
+
     if (img == NULL) {
         img = XCreateImage(d, vis, dpth, ZPixmap, 0, 0, w, h, XBitmapPad(d), 0);
         if (img != NULL) {
@@ -431,7 +433,7 @@ vid_open(char *title, int width, int height, int scale, int flags)
     Display *d;
     XEvent evt;
     int w, h, rw, rh, bpp;
-    
+
     if (title == NULL) {
         title = "vFWLE";
     }
@@ -444,28 +446,28 @@ vid_open(char *title, int width, int height, int scale, int flags)
     if (scale < 1) {
         scale = 1;
     }
-    
+
     FW_curinfo.flags = flags;
     FW_curinfo.bytespp = 4; /* 4 bytes per pixel */
-    
-    bpp = FW_curinfo.bytespp; 
+
+    bpp = FW_curinfo.bytespp;
 
     FW_curinfo.width  = FW_BYTE_ALIGN(width , bpp);
     FW_curinfo.height = FW_BYTE_ALIGN(height, bpp);
     rw = FW_curinfo.width;
     rh = FW_curinfo.height;
-    
+
     FW_curinfo.pitch = FW_CALC_PITCH(rw, bpp);
-    
+
     deviceinfo.scale  = scale;
     deviceinfo.width  = FW_BYTE_ALIGN(rw * scale, bpp);
     deviceinfo.height = FW_BYTE_ALIGN(rh * scale, bpp);
-    
+
     FWi_x.width  = deviceinfo.width;
     FWi_x.height = deviceinfo.height;
     w = FWi_x.width;
     h = FWi_x.height;
-    
+
     FW_info("[xvid] creating X video context [%dx%d]", w, h);
 
     close_xdisplay();
@@ -473,31 +475,31 @@ vid_open(char *title, int width, int height, int scale, int flags)
         FW_info("[xvid] couldn't create display or window");
         return FW_VERR_WINDOW;
     }
-    
+
     d = FWi_x.display;
-    
+
     XResizeWindow(d, FWi_x.window, w, h);
-    
+
     hints.flags      = PMinSize | PMaxSize | PBaseSize;
     hints.min_width  = hints.max_width  = hints.base_width = w;
     hints.min_height = hints.max_height = hints.base_height = h;
     XSetWMNormalHints(d, FWi_x.window, &hints);
-    
+
     XMapRaised(d, FWi_x.window);
     do {
         XMaskEvent(d, StructureNotifyMask, &evt);
     } while ((evt.type != MapNotify) || (evt.xmap.event != FWi_x.window));
-    
+
     XStoreName  (d, FWi_x.window, title);
     XSetIconName(d, FWi_x.window, title);
-    
+
     XSelectInput(d, FWi_x.window, FW_XEVENT_MASK);
-    
+
     if (!create_xvidbuffer(w, h, flags & FW_VFLAG_VIDFAST)) {
         FW_info("[xvid] couldn't create video buffer");
         return FW_VERR_WINDOW;
     }
-    
+
     if (FW_curinfo.video) {
         free(FW_curinfo.video);
     }
@@ -505,11 +507,11 @@ vid_open(char *title, int width, int height, int scale, int flags)
     if (FW_curinfo.video == NULL) {
         return FW_VERR_NOMEM;
     }
-  
+
     /* refresh newly created display */
     vid_blit();
     vid_sync();
-    
+
     return FW_VERR_OK;
 }
 
@@ -520,7 +522,7 @@ resizevideo(unsigned *src, unsigned sw, unsigned sh,
     register unsigned *t, *p;
     int ratx, raty, acc;
     unsigned x, y;
-        
+
     ratx = ((sw << 16) / dw) + 1;
     raty = ((sh << 16) / dh) + 1;
     for (y = 0; y < dh; y++) {
@@ -541,7 +543,7 @@ vid_blit(void)
     Window w;
     unsigned *v;
     unsigned sw, sh, dw, dh;
-    
+
     v  = (unsigned *) FW_curinfo.video;
     d  = FWi_x.display;
     if ((v == NULL) || (d == NULL)) {
@@ -594,11 +596,11 @@ wnd_osm_handle(void)
 {
     XEvent e;
     int ret;
-    
+
     if (FWi_x.display == NULL) {
         return 0;
     }
-        
+
     ret = 0;
     while (XPending(FWi_x.display)) {
         memset(&e, 0, sizeof(XEvent));
@@ -674,7 +676,7 @@ static int
 hardware_clk_query(void)
 {
     mach_timebase_info_data_t info;
-    
+
     return (mach_timebase_info(&info) == 0);
 }
 
@@ -704,7 +706,7 @@ static int
 hardware_clk_query(void)
 {
     struct timespec ts;
-    
+
     return (clock_gettime(CLOCK_MONOTONIC, &ts) == 0);
 }
 
@@ -712,13 +714,13 @@ static utime
 hardware_clk_ms(int *avail) /* return 0 in int* if not avail */
 {
     struct timespec ts;
-    
+
     if (clock_gettime(CLOCK_MONOTONIC, &ts)) {
         /* fallback */
         *avail = 0;
         return 0;
     }
-    
+
     *avail = 1;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (utime) (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
@@ -729,7 +731,7 @@ extern void
 clk_init(void)
 {
     static int clk_init = 0;
-    
+
     if (!clk_init) {
         clk_hires_supported = hardware_clk_query();
         clk_init = 1;
@@ -765,9 +767,9 @@ clk_sample(void)
     if (clock_mode == FW_CLK_MODE_LORES) {
         return (time(NULL) * 1000);
     }
-    
+
     /* first try hardware clock */
-    if (avail) {        
+    if (avail) {
         tm = hardware_clk_ms(&avail);
         if (!avail) {
             goto fbclk;
@@ -779,7 +781,7 @@ clk_sample(void)
 fbclk:
     gettimeofday(&tv, NULL);
     return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
-    
+
 }
 
 static void def_keyboard_func(int key) { (void) key; }
@@ -816,7 +818,7 @@ static struct {
    {XK_x, 'x'},
    {XK_y, 'y'},
    {XK_z, 'z'},
-   
+
    {XK_A, 'A'},
    {XK_B, 'B'},
    {XK_C, 'C'},
@@ -843,7 +845,7 @@ static struct {
    {XK_X, 'X'},
    {XK_Y, 'Y'},
    {XK_Z, 'Z'},
-   
+
    {XK_0, '0'},
    {XK_1, '1'},
    {XK_2, '2'},
@@ -919,7 +921,7 @@ xkey_callb(XKeyEvent *event)
     int send = 0;
     int j, n = (sizeof(xl8tab) / sizeof(*xl8tab));
     KeySym sym;
-    
+
     sym = XLookupKeysym(event, 0);
     for (j = 0; j < n; j++) {
         if (xl8tab[j].keysym == sym) {
@@ -927,7 +929,7 @@ xkey_callb(XKeyEvent *event)
             break;
         }
     }
-    
+
     if (event->type == KeyPress) {
         keyboard_func(send);
     } else {
@@ -1021,4 +1023,3 @@ vid_getinfo(void)
 }
 
 #endif
-
