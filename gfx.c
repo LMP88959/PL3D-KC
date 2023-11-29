@@ -110,7 +110,7 @@ PL_init(int *video, int hres, int vres)
 	}
 
 	/* set buffer offsets */
-	x_L = g3dresv + vres;
+    x_L = g3dresv;
     x_R = x_L + vres;
     xLc = x_R + vres;
     xRc = xLc + vres;
