@@ -201,7 +201,8 @@ pscan(int *stream, int dim, int len)
     scan_miny = INT_MAX;
     scan_maxy = INT_MIN;
     /* clean scan tables */
-    memcpy(x_L, xLc, 2 * PL_vres * sizeof(int));
+    memcpy(x_L, xLc, PL_vres * sizeof(int));
+    memcpy(x_R, xRc, PL_vres * sizeof(int));
   
     len = PL_clip_poly_x(VS, stream, dim, len);
     while (len--) {
